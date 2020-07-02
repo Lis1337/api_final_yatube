@@ -26,7 +26,7 @@ class FollowSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
         many=False,
         slug_field='username',
-        queryset=User.objects.all()
+        read_only=True
         )
     following = serializers.SlugRelatedField(
         many=False,
@@ -38,14 +38,14 @@ class FollowSerializer(serializers.ModelSerializer):
         model = Follow
         fields = ('user', 'following')
 
-    def validation(self, data):
+    def validate(self, data):
         following = data['following']
-        user = data['user']
-        follow = Follow.objects.filter(following=following, user=user).exists()
-        
-        if user == following:
+        data['user'] = self.context['request'].user
+        follow = Follow.objects.filter(following=following, user=data['user']).exists()
+
+        if data['user'] == following:
             raise ValidationError('Cant subscribe to yourself')
-        elif follow:
+        if follow:
             raise ValidationError('You have already signed up')
         return data
 

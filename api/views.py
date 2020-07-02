@@ -44,11 +44,6 @@ class FollowList(generics.ListCreateAPIView):
     filter_backends = [filters.SearchFilter]
     search_fields = ['=user__username', '=following__username']
 
-    def perform_create(self, serializer):
-        serializer.save(
-            user=self.request.user, following=User.objects.get(username=self.request.data.get('following'))
-            )
-
 
 class GroupList(generics.ListCreateAPIView):
     queryset = Group.objects.all()
